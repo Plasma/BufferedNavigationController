@@ -1,0 +1,11 @@
+BufferedNavigationController extends UINavigationController to automatically queue up transitions between view controllers.
+
+This prevents you receiving errors such as:
+"Finishing up a navigation transition in an unexpected state. Navigation Bar subview tree might get corrupted."
+
+This can happen if you try to pushViewController during an existing transition.
+
+To use, simply add the provided files to your project and change your UINavigationController class to inherit from BufferedNavigationController in Interface Builder.
+
+- Andrew Armstrong (phplasma@gmail.com)
+- http://cherrypopapp.com
