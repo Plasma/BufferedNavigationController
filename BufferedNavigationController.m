@@ -24,7 +24,6 @@
     if (self) {
         self.delegate = self;
         self.stack = [[[NSMutableArray alloc] init] autorelease];
-        self.navigationBar.tintColor = [UIColor colorWithRed:211.0f/255 green:62.0f/255 blue:62.0f/255 alpha:1];
     }
     
     return self;
