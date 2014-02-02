@@ -7,10 +7,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,21 +26,11 @@
 @synthesize transitioning = _transitioning;
 @synthesize stack = _stack;
 
-- (void)dealloc {
-    [self.stack removeAllObjects];
-    self.stack = nil;
-    
-    [super dealloc];
-}
+- (void)viewDidLoad {
+    [super viewDidLoad];
 
-- (id)init {
-    self = [super init];
-    if (self) {
-        self.delegate = self;
-        self.stack = [[[NSMutableArray alloc] init] autorelease];
-    }
-    
-    return self;
+    self.delegate = self;
+    self.stack = [[NSMutableArray alloc] init];
 }
 
 - (UIViewController *)popViewControllerAnimated:(BOOL)animated {
@@ -50,8 +40,7 @@
                 [super popViewControllerAnimated:animated];
             } copy];
             [self.stack addObject:codeBlock];
-            [codeBlock release];
-            
+
             // We cannot show what viewcontroller is currently animated now
             return nil;
         } else {
@@ -67,10 +56,9 @@
             void (^codeBlock)(void) = [^{
                 [super setViewControllers:viewControllers animated:animated];
             } copy];
-            
+
             // Add to the stack list and then release
             [self.stack addObject:codeBlock];
-            [codeBlock release];
         } else {
             [super setViewControllers:viewControllers animated:animated];
         }
@@ -79,8 +67,8 @@
 
 - (void) pushCodeBlock:(void (^)())codeBlock{
     @synchronized(self.stack) {
-        [self.stack addObject:[[codeBlock copy] autorelease]];
-        
+        [self.stack addObject:[codeBlock copy]];
+
         if (!self.transitioning)
             [self runNextBlock];
     }
@@ -93,7 +81,6 @@
                 [super pushViewController:viewController animated:animated];
             } copy];
             [self.stack addObject:codeBlock];
-            [codeBlock release];
         } else {
             [super pushViewController:viewController animated:animated];
         }
@@ -101,14 +88,14 @@
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    
+
     @synchronized(self.stack) {
         self.transitioning = true;
     }
 }
 
 - (void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    
+
     @synchronized(self.stack) {
         self.transitioning = false;
 
@@ -119,12 +106,12 @@
 - (void) runNextBlock {
     if (self.stack.count == 0)
         return;
-    
+
     void (^codeBlock)(void) = [self.stack objectAtIndex:0];
-    
+
     // Execute block, then remove it from the stack (which will dealloc)
     codeBlock();
-    
+
     [self.stack removeObjectAtIndex:0];
 }
 
