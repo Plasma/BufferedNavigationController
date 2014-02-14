@@ -49,6 +49,24 @@
     }
 }
 
+- (NSArray *)popToRootViewControllerAnimated:(BOOL)animated {
+    @synchronized(self.stack) {
+
+        if (self.transitioning) {
+            void (^codeBlock)(void) = [^{
+                [super popToRootViewControllerAnimated:animated];
+            } copy];
+            [self.stack addObject:codeBlock];
+
+            // We cannot show what viewcontroller is currently animated now
+            return nil;
+        } else {
+            return [super popToRootViewControllerAnimated:animated];
+        }
+    }
+
+}
+
 - (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
     @synchronized(self.stack) {
         if (self.transitioning) {
