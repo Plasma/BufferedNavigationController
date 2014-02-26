@@ -51,7 +51,6 @@
 
 - (NSArray *)popToRootViewControllerAnimated:(BOOL)animated {
     @synchronized(self.stack) {
-
         if (self.transitioning) {
             void (^codeBlock)(void) = [^{
                 [super popToRootViewControllerAnimated:animated];
@@ -64,7 +63,22 @@
             return [super popToRootViewControllerAnimated:animated];
         }
     }
+}
 
+- (NSArray*) popToViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    @synchronized(self.stack) {
+        if (self.transitioning) {
+            void (^codeBlock)(void) = [^{
+                [super popToViewController:viewController animated:animated];
+            } copy];
+            [self.stack addObject:codeBlock];
+
+            // We cannot show what viewcontroller is currently animated now
+            return nil;
+        } else {
+            return [super popToViewController:viewController animated:animated];
+        }
+    }
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers animated:(BOOL)animated {
