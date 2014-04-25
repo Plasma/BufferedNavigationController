@@ -121,8 +121,16 @@
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
 
-    @synchronized(self.stack) {
+    @synchronized (self.stack) {
         self.transitioning = true;
+        id <UIViewControllerTransitionCoordinator> transitionCoordinator = navigationController.topViewController.transitionCoordinator;
+        [transitionCoordinator notifyWhenInteractionEndsUsingBlock:^(id <UIViewControllerTransitionCoordinatorContext> context) {
+            if ([context isCancelled]) {
+                @synchronized (self.stack) {
+                    self.transitioning = false;
+                }
+            }
+        }];
     }
 }
 
